@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background-color: #f9f9f9;
+    }
+
+    h2 {
+      color: #4CAF50;
+      margin-bottom: 30px;
+    }
+
+    input {
+      padding: 10px;
+      width: 240px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    #suggestions {
+      margin: 0 auto;
+      width: 260px;
+      text-align: left;
+      background: white;
+      border: 1px solid #ccc;
+      border-top: none;
+      position: absolute;
+      z-index: 10;
+    }
+
+    #suggestions div {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    #suggestions div:hover {
+      background-color: #eee;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    #results {
+      margin-top: 30px;
+      text-align: left;
+      width: 60%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .theatre {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🎬 Welcome to Movie Ticket Booking!</h2>
+
+  <div style="position: relative; display: inline-block;">
+    <input type="text" id="movieName" placeholder="Search a movie..." oninput="showSuggestions()" />
+    <div id="suggestions"></div>
+  </div>
+  <button onclick="searchMovie()">Search</button>
+
+  <div id="results"></div>
+
+  <script>
+    const movieInput = document.getElementById('movieName');
+    const suggestionBox = document.getElementById('suggestions');
+
+    async function showSuggestions() {
+      const value = movieInput.value;
+      suggestionBox.innerHTML = '';
+
+      if (value.length < 2) return;
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/movies/suggestions?query=${encodeURIComponent(value)}`);
+        const suggestions = await res.json();
+
+        suggestions.forEach(movie => {
+          const div = document.createElement('div');
+          div.textContent = movie.title;
+          div.onclick = () => {
+            movieInput.value = movie.title;
+            suggestionBox.innerHTML = '';
+            searchMovie(); // trigger search immediately on selection
+          };
+          suggestionBox.appendChild(div);
+        });
+      } catch (err) {
+        console.error('Suggestion fetch error:', err);
+      }
+    }
+
+    async function searchMovie() {
+      const name = movieInput.value;
+      const results = document.getElementById('results');
+      suggestionBox.innerHTML = ''; // clear suggestions
+      results.innerHTML = 'Searching...';
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/movies?name=${encodeURIComponent(name)}`);
+        const data = await res.json();
+console.log("📦 Movie data from backend:", data); // 👈 ADD THIS LINE
+
+        results.innerHTML = `<h3>${data.title}</h3>`;
+
+if (Array.isArray(data.theatres) && data.theatres.length > 0) {
+  data.theatres.forEach(theatre => {
+    const showtimes = Array.isArray(theatre.showtimes) ? theatre.showtimes.join(', ') : 'Not available';
+    const languages = Array.isArray(theatre.languages) ? theatre.languages.join(', ') : 'Not available';
+
+    results.innerHTML += `
+      <div class="theatre">
+        <strong>${theatre.name || 'Unnamed Theatre'}</strong><br>
+        🎭 Showtimes: ${showtimes}<br>
+        🌐 Languages: ${languages}
+      </div>
+    `;
+  });
+} else {
+  results.innerHTML += `<p>No theatres available for this movie.</p>`;
+}
+
+      } catch (err) {
+        console.error(err);
+        results.innerHTML = `<p class="error">Something went wrong. Please try again.</p>`;
+      }
+    }
+  </script>
+
+</body>
+</html>
+
+
+
