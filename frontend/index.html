@@ -1,13 +1,183 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Movie Ticket Reservation</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Movie Ticket Reservation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Importing the Poppins font from Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-image: url('./images/wallpaper2.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: #ffffff;
+  text-align: center;
+}
+header {
+  padding: 20px;
+}
+h1 {
+  font-size: 2.6rem;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 600;
+  color: #ffffff;
+}
+.buttons {
+  margin: 20px 0;
+}
+.buttons button {
+  padding: 14px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: all 0.3s ease;
+}
+.buttons .login {
+  background: linear-gradient(135deg, #0074D9, #005fa3);
+  color: #fff;
+}
+.buttons .register {
+  background: linear-gradient(135deg, #FF851B, #ff6700);
+  color: #fff;
+}
+.buttons .login:hover {
+  background: linear-gradient(135deg, #005fa3, #004080);
+  transform: scale(1.06);
+}
+.buttons .register:hover {
+  background: linear-gradient(135deg, #ff6700, #d94f00);
+  transform: scale(1.06);
+}
+h2 {
+  font-size: 1.8rem;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 600;
+  margin: 30px 0 10px;
+  color: #ffffff;
+}
+.carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.carousel-container {
+  overflow: hidden;
+  width: 90%;
+}
+.carousel-track {
+  display: flex;
+}
+.poster {
+  position: relative;
+  flex: 0 0 auto;
+  margin: 10px;
+  overflow: hidden;
+}
+.poster img {
+  width: 250px;
+  height: 375px;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+.poster:hover img {
+  transform: scale(1.03);
+}
+.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+}
+.arrow {
+  position: absolute;
+  font-size: 30px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  padding: 5px 10px;
+  user-select: none;
+  z-index: 10;
+}
+.arrow.left {
+  left: 5px;
+}
+.arrow.right {
+  right: 5px;
+}
+.arrow:hover {
+  color: #FF851B;
+}
+@media screen and (max-width: 600px) {
+  .poster img {
+    width: 180px;
+    height: 270px;
+  }
+  .arrow {
+    font-size: 24px;
+  }
+}
+</style>
 </head>
 <body>
+<header>
   <h1>Welcome to Movie Ticket Reservation</h1>
-  <button onclick="window.location.href='login.html'">Login</button>
-  <button onclick="window.location.href='register.html'">Register</button>
-  <script src="script.js"></script>
+  <div class="buttons">
+    <button class="login"onclick="window.location.href='login.html'">Login</button>
+    <button class="register"onclick="window.location.href='register.html'">Register</button>
+  </div>
+</header>
+
+<h2>🎞️ Upcoming Movies</h2>
+<div class="carousel">
+  <div class="arrow left" id="prev">&#10094;</div>
+  <div class="carousel-container">
+    <div class="carousel-track" id="track">
+      <div class="poster"><img src="images/coolie.jpg" alt="Coolie"><div class="overlay">Releasing on August 14</div></div>
+      <div class="poster"><img src="images/dragon.jpg" alt="How to Train your Dragon"><div class="overlay">Released on June 13</div></div>
+      <div class="poster"><img src="images/superman.jpg" alt="Superman"><div class="overlay">Releasing on July 11</div></div>
+      <div class="poster"><img src="images/fantastic.jpeg" alt="Fantastic Four"><div class="overlay">Releasing on July 25</div></div>
+      <div class="poster"><img src="images/tourist.jpg" alt="Tourist family"><div class="overlay">Releasing on June 25</div></div>
+      <div class="poster"><img src="images/jurassic.jpg" alt="Jurassic World Rebirth"><div class="overlay">Releasing on July 4</div></div>
+      <div class="poster"><img src="images/minions.jpg" alt="Despicable me 4"><div class="overlay">Releasing on July 1</div></div>
+      <div class="poster"><img src="images/kubera.jpeg" alt="Kubera"><div class="overlay">Released on June 20</div></div>
+    </div>
+  </div>
+  <div class="arrow right" id="next">&#10095;</div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const container = document.querySelector('.carousel-container');
+  const nextButton = document.getElementById('next');
+  const prevButton = document.getElementById('prev');
+  const scrollAmount = 300;
+
+  nextButton.addEventListener('click', () => {
+    container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  });
+  prevButton.addEventListener('click', () => {
+    container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  });
+});
+</script>
 </body>
 </html>
+
+
+

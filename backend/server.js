@@ -1,17 +1,22 @@
-console.log("✅ This is the REAL server.js running.");
+// ✅ This is the REAL server.js
+console.log("✅ Starting the server...");
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
-// Route files
-const userRoutes = require('./routes/userRoutes');
-const authRoutes = require("./routes/auth");
+// 🧭 Import route files
+const userRoutes = require('./routes/userRoutes');      // User account routes
+const authRoutes = require('./routes/auth');           // Login/Register routes
 const theatreRoutes = require('./routes/theatreRoutes');
 const movieRoutes = require('./routes/movieRoutes');
+const seatRoutes = require('./routes/seatRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 
-// Models
+// 🧭 Import models (for direct register if you want)
 const User = require('./models/User');
 
 const app = express();
@@ -23,59 +28,64 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// 🗂️ Static files
+// 📂 Serve frontend static files
 app.use(express.static(path.join(__dirname, '../frontend')));
+
+// 🧭 Mount routes
+app.use('/api/users', userRoutes);      // User account/profile routes
+app.use('/api/auth', authRoutes);       // Login/Register routes
 app.use('/api/theatres', theatreRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api', seatRoutes);            // Seat booking routes
+app.use('/api/bookings', bookingRoutes);// Booking routes
 
-// 🌐 Routes
-app.use('/api/users', userRoutes);
-console.log("✅ userRoutes are mounted!");
+// ✅ Test routes
+app.get('/hello', (req, res) => res.send('👋 Hello from server!'));
+app.post('/hello', (req, res) => res.send('👋 Hello from server!'));
 
-app.use('/api/auth', authRoutes);
-
-// ⛳ Default route for frontend
+// 🏠 Fallback to index.html for frontend routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// 📝 Optional: Direct POST route for register (you may later move it to authRoutes.js)
-app.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
+// Route for Change Password
+app.put('/api/users/change-password/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { currentPassword, newPassword } = req.body;
 
   try {
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ message: 'Email already registered' });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
     }
 
-    const newUser = new User({ username, email, password });
-    await newUser.save();
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Current password is incorrect.' });
+    }
 
-    res.status(200).json({ message: 'Registered successfully' });
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    await user.save();
+    res.json({ message: 'Password updated successfully!' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Registration failed' });
+    res.status(500).json({ error: 'Error updating password.' });
   }
 });
-app.post('/hello', (req, res) => {
-  res.send("👋 Hello from server!");
-});
-app.get('/hello', (req, res) => {
-  res.send("👋 Hello from server!");
-});
 
-
-
-// ✅ MongoDB + Start server once
-mongoose.connect("mongodb://localhost:27017/movie-db", {
+// ✅ MongoDB connection + server start
+mongoose.connect('mongodb://localhost:27017/movie-db', {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 })
   .then(() => {
-    console.log("✅ Connected to MongoDB");
+    console.log('✅ MongoDB connected successfully');
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
   })
-  .catch(err => console.error("❌ MongoDB Connection Error:", err));
+  .catch(err => console.error('❌ MongoDB connection error:', err));
+
+

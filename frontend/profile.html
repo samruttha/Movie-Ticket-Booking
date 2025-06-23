@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>👤 My Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Poppins Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600" rel="stylesheet">
+
+<style>
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  background: linear-gradient(rgba(0,0,0,.3), rgba(0,0,0,.3)), url('./images/wallpaper2.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  padding: 20px;
+}
+h2 {
+  text-align: center;
+  font-size: 2rem;
+  text-shadow: 2px 2px 5px #000;
+}
+.nav {
+  text-align: center;
+  margin: 20px 0;
+}
+.nav button {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 20px;
+  margin: 5px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, #006f65, #00938c);
+}
+.nav button:hover {
+  transform: scale(1.07);
+}
+.section {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 12px;
+  box-shadow: 0px 3px 15px rgba(0,0,0,.3);
+  display: none;
+}
+.section.active {
+  display: block;
+}
+label {
+  display: block;
+  margin: 10px 0 3px;
+}
+input {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: none;
+}
+.submit-button {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 14px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, #006f65, #00938c);
+  margin: 15px 0;
+}
+.submit-button:hover {
+  transform: scale(1.07);
+}
+#updateMessage, #changePasswordMessage {
+  font-size: 1rem;
+  text-align: center;
+}
+.history-list {
+  max-height: 900px;
+  margin: 20px auto;
+}
+.history-item {
+   display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255,255,255,0.1);
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-bottom: 1px solid #eee; 
+}
+.history-column {
+  flex: 1;
+  padding: 0 25px; /* space between columns */
+}
+.history-item:hover {
+  background: rgba(255,255,255,0.2);
+}
+.history-item div {
+  flex: 1;
+}
+.history-item .movie {
+  flex: 3;
+}
+.history-item .showtime,
+.history-item .theatre,
+.history-item .date,
+.history-item .seats {
+  flex: 1;
+  text-align: center;
+}
+.history-item:last-child {
+  border-bottom: none;
+}
+#historySection {
+  max-width: 90%;           /* Increased width */
+  margin: 30px auto;
+}
+#historyList {
+  padding: 10px;
+}
+#historyList div.no-entries {
+  font-size: 1rem;
+  text-align: center;
+  padding: 15px;
+}
+</style>
+</head>
+<body>
+<h2>👤 My Profile</h2>
+<div class="nav">
+  <button data-target="profileSection">Edit Profile</button>
+  <button data-target="passwordSection">Change Password</button>
+  <button data-target="historySection">Booking History</button>
+</div>
+
+<!-- Edit Profile Section -->
+<div id="profileSection" class="section active">
+  <label>Username: <input id="username"></label>
+  <label>Email: <input id="email" type="email"></label>
+  <label>Contact: <input id="contact"></label>
+  <button class="submit-button" id="updateProfileBtn">Update Profile</button>
+  <p id="updateMessage"></p>
+</div>
+
+<!-- Change Password Section -->
+<div id="passwordSection" class="section">
+  <label>Current Password: <input id="currentPassword" type="password"></label>
+  <label>New Password: <input id="newPassword" type="password"></label>
+  <label>Confirm New Password: <input id="confirmPassword" type="password"></label>
+  <button class="submit-button" id="changePasswordBtn">Change Password</button>
+  <p id="changePasswordMessage"></p>
+</div>
+
+<!-- Booking History Section -->
+<div id="historySection" class="section">
+  <h3>📜 Booking History</h3>
+  <div class="history-list" id="historyList"></div>
+</div>
+
+<!-- Scripts -->
+<script>
+const userId = localStorage.getItem('userId');
+if (!userId) {
+  alert('❌ You must be logged in!');
+  window.location.href = 'login.html';
+}
+
+// ✅ Activate the right section based on the 'section' query parameter
+const urlParams = new URLSearchParams(window.location.search);
+const targetSection = urlParams.get('section');
+const sections = document.querySelectorAll('.section');
+sections.forEach(section => section.classList.remove('active'));
+switch (targetSection) {
+  case 'profile':
+    document.getElementById('profileSection').classList.add('active');
+    break;
+  case 'password':
+    document.getElementById('passwordSection').classList.add('active');
+    break;
+  case 'history':
+    document.getElementById('historySection').classList.add('active');
+    break;
+  default:
+    document.getElementById('profileSection').classList.add('active');
+}
+
+// Navbar Buttons Logic
+const navButtons = document.querySelectorAll('.nav button');
+navButtons.forEach(button => {
+  button.addEventListener('click', e => {
+    sections.forEach(section => section.classList.remove('active'));
+    const targetId = e.currentTarget.getAttribute('data-target');
+    document.getElementById(targetId).classList.add('active');
+  });
+});
+
+// Load Profile
+fetch(`http://localhost:5000/api/users/profile/${userId}`)
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('username').value = data.username;
+    document.getElementById('email').value = data.email;
+    document.getElementById('contact').value = data.contact || '';
+  }).catch(err => console.error(err));
+
+// Load Booking History
+fetch(`http://localhost:5000/api/users/history/${userId}`)
+  .then(res => res.json())
+  .then(data => {
+    const list = document.getElementById('historyList');
+    list.innerHTML = '';
+    if (!data.length) {
+      list.innerHTML = '<div class="history-item">No bookings yet.</div>';
+    } else {
+      data.forEach(b => {
+        list.innerHTML += `
+          <div class="history-item">
+           <div class="movie">🎬 ${b.movieTitle}</div>
+           <div class="showtime">🕑 ${b.showtime}</div>
+           <div class="theatre">📍 ${b.theatreName}</div>
+           <div class="date">📅 ${new Date(b.date).toLocaleDateString()}</div>
+           <div class="seats">🎟 ${b.seats.join(', ')}</div>
+           <div class="booked-at">⏳ Booked At: ${new Date(b.createdAt).toLocaleString()}</div>
+          </div>
+        `;
+      });
+    }
+  }).catch(err => console.error(err));
+
+// Update Profile
+document.getElementById('updateProfileBtn').addEventListener('click', () => {
+  const username = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const contact = document.getElementById('contact').value.trim();
+
+  fetch(`http://localhost:5000/api/users/profile/${userId}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ username, email, contact })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const msg = document.getElementById('updateMessage');
+    msg.textContent = data.message;
+    msg.style.color = 'green';
+    localStorage.setItem('username', username);
+  })
+  .catch(error => {
+    const msg = document.getElementById('updateMessage');
+    msg.textContent = 'Error updating profile';
+    msg.style.color = 'red';
+  });
+});
+
+// Change Password
+function changePassword() {
+  const currentPassword = document.getElementById('currentPassword').value.trim();
+  const newPassword = document.getElementById('newPassword').value.trim();
+  const confirmPassword = document.getElementById('confirmPassword').value.trim();
+  const msg = document.getElementById('changePasswordMessage');
+
+  if (newPassword !== confirmPassword) {
+    msg.textContent = 'Passwords do not match!';
+    msg.style.color = 'red';
+    return;
+  }
+
+  fetch(`http://localhost:5000/api/users/change-password/${userId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ currentPassword, newPassword })
+  })
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(data => {
+          throw new Error(data.error || 'Unknown error');
+        });
+      }
+      return res.json();
+    })
+    .then(data => {
+      msg.textContent = data.message || 'Password changed!';
+      msg.style.color = 'green';
+    })
+    .catch(error => {
+      msg.textContent = error.message || 'Error while changing password';
+      msg.style.color = 'red';
+    });
+}
+
+document.getElementById('changePasswordBtn').addEventListener('click', changePassword);
+</script>
+</body>
+</html>
+
+

@@ -1,19 +1,171 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Register</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Register | Movie Ticket Reservation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Importing the Poppins font from Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-image: url('./images/wallpaper2.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  background-color: rgb (0,0,0,0);
+  max-width: 400px;
+  margin: 100px auto;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+}
+h2 {
+  font-size: 2rem;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+input {
+  padding: 12px;
+  width: 100%;
+  max-width: 100%;
+  margin: 8px 0;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+}
+button {
+  padding: 14px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #FF851B, #ff6700);
+  color: #fff;
+  margin: 15px 0;
+  transition: all 0.3s ease;
+}
+button:hover {
+  background: linear-gradient(135deg, #ff6700, #d94f00);
+  transform: scale(1.06);
+}
+.register-links {
+  text-align: center;
+}
+.register-links p {
+  font-size: 1rem;
+  margin: 8px 0;
+}
+.register-links a {
+  color: #FF851B;
+  font-weight: 600;
+  text-decoration: none;
+}
+.register-links a:hover {
+  text-decoration: underline;
+}
+#message {
+  margin: 10px 0;
+  font-size: 1rem;
+}
+@media screen and (max-width: 600px) {
+  .container {
+    margin: 40px auto;
+    padding: 20px;
+  }
+  h2 {
+    font-size: 1.5rem;
+  }
+  input {
+    font-size: 1rem;
+  }
+  button {
+    font-size: 1rem;
+    padding: 12px 20px;
+  }
+}
+</style>
 </head>
 <body>
+<div class="container">
   <h2>Register</h2>
   <form id="registerForm">
-    <input type="text" id="username" placeholder="Username" required><br><br>
-    <input type="email" id="email" placeholder="Email" required><br><br>
-    <input type="password" id="password" placeholder="Password" required><br><br>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="tel" id="contact" placeholder="Contact Number (10 digits)" pattern="[0-9]{10}" maxlength="10" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
     <button type="submit">Register</button>
   </form>
-  <p>Already have an account? <a href="login.html">Login</a></p>
+  <div class="register-links">
+    <p>Already have an account? <a href="login.html">Login</a></p>
+    <p id="message"></p>
+  </div>
+</div>
 
-  <script src="script.js"></script>
+<script>
+const form = document.getElementById('registerForm');
+const message = document.getElementById('message');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const contact = document.getElementById('contact').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  message.textContent = '';
+  message.style.color = 'red';
+
+  if (password !== confirmPassword) {
+    message.textContent = '❌ Passwords do not match';
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ username, email, contact, password })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem('userId', data.user._id);
+      localStorage.setItem('username', username);
+      localStorage.setItem('email', email);
+      localStorage.setItem('contact', contact);
+      message.style.color = 'green';
+      message.textContent = 'Redirecting...';
+      setTimeout(() => window.location.href = 'dashboard.html', 1000);
+    } else {
+      message.textContent = data.message || '❌ Registration failed';
+    }
+  } catch (error) {
+    message.textContent = '❌ Error: ' + error.message;
+  }
+});
+</script>
 </body>
 </html>
+
+
+
