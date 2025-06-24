@@ -11,9 +11,7 @@ const bcrypt = require('bcrypt');
 // 🧭 Import route files
 const userRoutes = require('./routes/userRoutes');      // User account routes
 const authRoutes = require('./routes/auth');           // Login/Register routes
-const theatreRoutes = require('./routes/theatreRoutes');
 const movieRoutes = require('./routes/movieRoutes');
-const seatRoutes = require('./routes/seatRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 
 // 🧭 Import models (for direct register if you want)
@@ -34,9 +32,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 // 🧭 Mount routes
 app.use('/api/users', userRoutes);      // User account/profile routes
 app.use('/api/auth', authRoutes);       // Login/Register routes
-app.use('/api/theatres', theatreRoutes);
-app.use('/api/movies', movieRoutes);
-app.use('/api', seatRoutes);            // Seat booking routes
+app.use('/api/movies', movieRoutes);          // Movie routes
 app.use('/api/bookings', bookingRoutes);// Booking routes
 
 // ✅ Test routes
